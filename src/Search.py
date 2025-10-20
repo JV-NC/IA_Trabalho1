@@ -1,0 +1,1 @@
+#TODO: colocar as funções dos algoritmos de busca aqui

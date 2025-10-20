@@ -1,0 +1,1 @@
+#TODO: usar time para tempo, sys ou memory_profiler para memoria, e contadores para nos gerados e expandidos
