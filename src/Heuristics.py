@@ -11,7 +11,7 @@ def manhattan_distance(adj: Dict[Pos, List[Pos]], goal: Pos)-> Dict[Pos, int]:
 
     return heuristic
 
-def euclidian_distance(adj: Dict[Pos, List[Pos]], goal: Pos)-> Dict[Pos, int]:
+def euclidian_distance(adj: Dict[Pos, List[Pos]], goal: Pos)-> Dict[Pos, float]:
     """Get euclidian distance for every node to goal, returns a Dict of all nodes and their distance to the goal"""
     heuristic: Dict[Pos, int] = {}
     for k in adj.keys():
