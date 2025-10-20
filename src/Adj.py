@@ -58,3 +58,38 @@ def generate_maze_adj(file: str) -> Tuple[Dict[Pos, List[Pos]], Optional[Pos], O
     adj = build_adjacency_list(maze)
     start, goal = find_positions(maze)
     return adj, start, goal
+
+def generate_maze_matrix(adj: Dict[Pos, List[Pos]], rows: int, cols: int, start: Optional[Pos] = None, goal: Optional[Pos] = None)->List[List[str]]:
+    """Generate maze matrix using adjacency list, returns maze matrix"""
+    maze = [['#' for _ in range(cols)] for _ in range(rows)]
+
+    for pos in adj:
+        r, c = pos
+        maze[r][c] = '.'
+
+    if start:
+        sr, sc = start
+        maze[sr][sc] = 'S'
+
+    if goal:
+        gr, gc = goal
+        maze[gr][gc] = 'G'
+
+    return maze
+
+def mark_path_on_maze(maze: List[List[str]], path: List[Pos]) -> List[List[str]]:
+    """Mark path using '*' on maze matrix and return new maze matrix."""
+    for r, c in path:
+        if maze[r][c] == '.':
+            maze[r][c] = '*'
+    return maze
+
+a,s,g = generate_maze_adj(file)
+print(type(a))
+for i in a:
+    print(i)
+print(s,g)
+
+m = generate_maze_matrix(a,5,5,s,g)
+for i in m:
+    print(i)
