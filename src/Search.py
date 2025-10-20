@@ -2,6 +2,7 @@
 import Adj
 from Adj import Pos
 from typing import Dict, List, Optional, Tuple, Union
+from Heuristics import manhattan_distance, euclidian_distance
 
 def bfs(adj: Dict[Pos, List[Pos]], start: Pos, goal: Pos)-> Optional[List[Pos]]:
     """Execute Breadth-First Search to find path from start to goal, if it exists"""
@@ -84,7 +85,41 @@ def greedy_search(adj: Dict[Pos, List[Pos]], heuristic: Dict[Pos, Union[int, flo
     if goal not in tracker: #path not found
         return None
 
-    path = []
+    path: List[Pos] = []
+    current = goal
+    while current:
+        path.append(current)
+        current = tracker[current]
+    
+    path.reverse
+    return path
+
+def a_star_search(adj: Dict[Pos, List[Pos]], heuristic: Dict[Pos, Union[int, float]], start: Pos, goal: Pos)-> Optional[List[Pos]]:
+    """Execute A* Search to find path from start to goal, if it exists"""
+
+    frontier: List[Pos] = [start]
+    tracker: Dict[Pos, Optional[Pos]] = {start:None}
+    current_cost: Dict[Pos, Union[int, float]] = {start: 0}
+
+    while frontier:
+        current = min(frontier,key=lambda pos: current_cost[pos] + heuristic.get(pos, float('inf')))
+        frontier.remove(current)
+
+        if current == goal: #path found
+            break
+
+        for neighbor in adj.get(current, []):
+            new_cost = current_cost[current]+1
+            if neighbor not in current_cost or new_cost < current_cost[neighbor]:
+                tracker[neighbor] = current
+                current_cost[neighbor] = new_cost
+                if neighbor not in frontier:
+                    frontier.append(neighbor)
+
+    if goal not in tracker: #path not found
+        return None
+
+    path: List[Pos] = []
     current = goal
     while current:
         path.append(current)
