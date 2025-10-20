@@ -83,13 +83,3 @@ def mark_path_on_maze(maze: List[List[str]], path: List[Pos]) -> List[List[str]]
         if maze[r][c] == '.':
             maze[r][c] = '*'
     return maze
-
-a,s,g = generate_maze_adj(file)
-print(type(a))
-for i in a:
-    print(i)
-print(s,g)
-
-m = generate_maze_matrix(a,5,5,s,g)
-for i in m:
-    print(i)
