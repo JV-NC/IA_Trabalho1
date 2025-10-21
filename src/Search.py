@@ -2,9 +2,7 @@ import Adj
 from Adj import Pos
 from typing import Dict, List, Optional, Tuple, Union, Set
 from Heuristics import manhattan_distance, euclidian_distance
-from memory_profiler import profile
 
-@profile
 def bfs(adj: Dict[Pos, List[Pos]], start: Pos, goal: Pos)-> Tuple[Optional[List[Pos]], int, int]:
     """Execute Breadth-First Search to find path from start to goal, if it exists"""
     generated = 0
@@ -37,7 +35,6 @@ def bfs(adj: Dict[Pos, List[Pos]], start: Pos, goal: Pos)-> Tuple[Optional[List[
     path.reverse()
     return path, expanded, generated
 
-@profile
 def dfs(adj: Dict[Pos, List[Pos]], start: Pos, goal: Pos)-> Tuple[Optional[List[Pos]], int, int]:
     """Execute Depth-First Search to find path from start to goal, if it exists"""
     queue = [start]
@@ -70,7 +67,6 @@ def dfs(adj: Dict[Pos, List[Pos]], start: Pos, goal: Pos)-> Tuple[Optional[List[
     path.reverse()
     return path, expanded, generated
 
-@profile
 def greedy_search(adj: Dict[Pos, List[Pos]], heuristic: Dict[Pos, Union[int, float]], start: Pos, goal: Pos)-> Tuple[Optional[List[Pos]], int, int]:
     """Execute Greedy Best-First Search to find path from start to goal, if it exists"""
 
@@ -109,7 +105,6 @@ def greedy_search(adj: Dict[Pos, List[Pos]], heuristic: Dict[Pos, Union[int, flo
     path.reverse()
     return path, generated, expanded
 
-@profile
 def a_star_search(adj: Dict[Pos, List[Pos]], heuristic: Dict[Pos, Union[int, float]], start: Pos, goal: Pos)-> Tuple[Optional[List[Pos]], int, int]:
     """Execute A* Search to find path from start to goal, if it exists"""
 
