@@ -52,7 +52,7 @@ def path_file(maze: List[List[str]], alg: str, time: float, generated: int = Non
 
 def main():
     file = 'data/maze.txt'
-    algs = ['bfs','dfs','greedy','a_star']
+    algs = ['bfs','dfs','greedy_manhattan','a_star_manhattan','greedy_euclidian','a_star_euclidian']
     times: Dict[str, float] = {}
     adj, start, goal = Adj.generate_maze_adj(file)
 
@@ -61,13 +61,17 @@ def main():
         times[alg] = time.time()
         match alg:
             case 'bfs':
-                 path, generated, expanded = Search.bfs(adj,start,goal)
+                path, generated, expanded = Search.bfs(adj,start,goal)
             case 'dfs':
-                 path, generated, expanded = Search.dfs(adj,start,goal)
-            case 'greedy':
-                 path, generated, expanded = Search.greedy_search(adj,manhattan_distance(adj,goal),start,goal)
-            case 'a_star':
-                 path, generated, expanded = Search.a_star_search(adj,manhattan_distance(adj,goal),start,goal)
+                path, generated, expanded = Search.dfs(adj,start,goal)
+            case 'greedy_manhattan':
+                path, generated, expanded = Search.greedy_search(adj,manhattan_distance(adj,goal),start,goal)
+            case 'a_star_manhattan':
+                path, generated, expanded = Search.a_star_search(adj,manhattan_distance(adj,goal),start,goal)
+            case 'greedy_euclidian':
+                path, generated, expanded = Search.greedy_search(adj,euclidian_distance(adj,goal),start,goal)
+            case 'a_star_euclidian':
+                path, generated, expanded = Search.a_star_search(adj,euclidian_distance(adj,goal),start,goal)
         times[alg] = time.time() - times[alg]
 
         def algorithm_function():
@@ -76,10 +80,14 @@ def main():
                     return Search.bfs(adj, start, goal)
                 case 'dfs':
                     return Search.dfs(adj, start, goal)
-                case 'greedy':
+                case 'greedy_manhattan':
                     return Search.greedy_search(adj, manhattan_distance(adj, goal), start, goal)
-                case 'a_star':
+                case 'a_star_manhattan':
                     return Search.a_star_search(adj, manhattan_distance(adj, goal), start, goal)
+                case 'greedy_euclidian':
+                    return Search.greedy_search(adj, euclidian_distance(adj, goal), start, goal)
+                case 'a_star_euclidian':
+                    return Search.a_star_search(adj, euclidian_distance(adj, goal), start, goal)
         
         mem_usage = run_with_memory_profile(algorithm_function)
         plot_memory(mem_usage, alg)
