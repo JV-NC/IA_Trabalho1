@@ -2,8 +2,6 @@ from typing import Tuple,List,Dict,Optional
 
 Pos = Tuple[int, int]
 
-file = 'data/maze.txt'
-
 def read_maze(file: str)->List[List[str]]:
     """This function reads maze.txt and returns a matrix"""
     with open(file, 'r') as f:
