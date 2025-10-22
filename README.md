@@ -36,15 +36,19 @@ Foram construídos **4 scripts em Python**:
 - O **PATH** deve estar configurado corretamente.  
 - Mova o arquivo `maze.txt`, contendo o labirinto, para o diretório: `/data/maze.txt`
 
-
+### Dependências
+Para instalar as dependências, abra um terminal e execute o seguinte comando
+```bash
+pip install colorama matplotlib memory_profiler
+```
 ---
 
 ### 2. Execução
-Abra um terminal e navegue até o diretório `/src` do projeto.  
+Abra um terminal e navegue até o diretório raiz do projeto.  
 Execute o comando:
 
 ```bash
-python ./Maze.py
+python src/Maze.py
 ```
 ### 3. Saída
 
