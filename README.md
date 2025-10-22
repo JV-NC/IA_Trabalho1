@@ -20,7 +20,7 @@ Foram construídos **4 scripts em Python**:
   Contém as funções de busca a serem utilizadas:  
   - `bfs`  
   - `dfs`  
-  - *Busca Gulosa*  
+  - `Busca Gulosa`  
   - `A*`
 
 - **Maze.py**  
