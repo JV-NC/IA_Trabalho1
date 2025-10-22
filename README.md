@@ -1,4 +1,4 @@
-# Trabalho 1 - Busca no Labirinto (Nâo Informada e Informada)
+# Trabalho 1 - Busca no Labirinto (Não Informada e Informada)
 
 Este trabalho tem como objetivo implementar algoritmos de busca de forma a solucionar um labirinto fornecido através de um arquivo `.txt`.  
 
