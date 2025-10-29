@@ -9,9 +9,7 @@ from memory_profiler import memory_usage
 import matplotlib.pyplot as plt
 import os
 
-os.makedirs('output',exist_ok=True)
-
-#TODO: comentar o codigo
+os.makedirs('trabalho1/output',exist_ok=True)
 
 def run_with_memory_profile(alg_function, *args):
     """Run a search algorithm and returns its memory usage"""
@@ -26,7 +24,7 @@ def plot_memory(mem_usage, alg):
     plt.xlabel('Time (samples)')
     plt.ylabel('Memory (MiB)')
     plt.grid(True)
-    plt.savefig(f'output/{alg}_memory_plot.png')
+    plt.savefig(f'trabalho1/output/{alg}_memory_plot.png')
     plt.close()
 
 def pretty_print_maze(maze: List[List[str]]):
@@ -48,14 +46,14 @@ def pretty_print_maze(maze: List[List[str]]):
 
 def path_file(maze: List[List[str]], alg: str, time: float, generated: int = None, expanded: int = None):
     """Save the algorithm path on a .txt file with its time and quantity of nodes generated and expanded"""
-    with open(f'output/path_{alg}.txt','w') as out:
+    with open(f'trabalho1/output/path_{alg}.txt','w') as out:
         if maze:
             for row in maze:
                 out.write(''.join(row)+'\n')
         out.write(f'Time: {time:.10f}s, Generated: {generated}, Expanded: {expanded}\n')
 
 def main():
-    file = 'data/maze.txt' #maze.txt
+    file = 'trabalho1/data/maze.txt' #maze.txt
     algs = ['bfs','dfs','greedy_manhattan','a_star_manhattan','greedy_euclidian','a_star_euclidian'] #types of algorithms used
     times: Dict[str, float] = {}
     adj, start, goal = Adj.generate_maze_adj(file)
