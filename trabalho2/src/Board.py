@@ -1,1 +1,0 @@
-#Representar o tabuleiro de xadrez para o problema das 8 rainhas
