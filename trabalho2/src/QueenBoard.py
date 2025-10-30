@@ -1,6 +1,7 @@
 import numpy as np
 from typing import List, Iterable, Tuple
-#Representar o tabuleiro de xadrez para o problema das 8 rainhas
+#TODO: Corrigir calculo da media de reinícios e movimentos
+#TODO: Implementar métrica de tempo
 
 Board = List[int]  #Cada índice representa uma coluna, o valor representa a linha da rainha naquela coluna
 Move = Tuple[int, int]  #Representa um movimento como (coluna, linha)
@@ -45,8 +46,11 @@ def generate_dict_conflicts(board: Board) -> dict:
     sorted_conflicts = dict(sorted(dict_conflicts.items(), key=lambda item: item[1]))
     return sorted_conflicts
 
-def hill_climb_with_lateral(board: Board, limit_break: int) -> Board:
+def hill_climb_with_lateral(board: Board, limit_break: int) -> Tuple[Board, int, float]:
     current_conflicts = conflicts(board)
+    reset_counter = 0
+    aux_counter = 0
+    move_mean = 0
 
     while current_conflicts != 0:
         next_move = next_move_with_lateral(board, limit_break)
@@ -54,23 +58,38 @@ def hill_climb_with_lateral(board: Board, limit_break: int) -> Board:
         if next_move == (8, 8):
             # only reset if board is not solved
             if current_conflicts != 0:
-                print ("Generating new board...")
+                reset_counter+=1
+                if move_mean==0:
+                    move_mean = aux_counter
+                else:
+                    move_mean = np.mean([move_mean,aux_counter])
+                aux_counter = 0
+                #print (f"{reset_counter}: Generating new board...")
                 board = initialize_board()
         else:
             board = apply_move(board, next_move)
+            aux_counter+=1
 
         # update conflicts AFTER applying move or reset
         current_conflicts = conflicts(board)
         #print(f"Current conflicts: {current_conflicts}")
+    return board, reset_counter, move_mean
 
-    return board
-
-def hill_climb_with_random(board: Board):
+def hill_climb_with_random(board: Board) -> Tuple[Board, int, float]:
+    reset_counter = 0
+    aux_counter = 0
+    move_mean = 0
     current_conflicts = conflicts(board)
     while current_conflicts !=0:
         restart_test = np.random.randint(0, 20)
         if restart_test == 1:
-            print ("Generating new board...")
+            reset_counter+=1
+            if move_mean==0:
+                move_mean = aux_counter
+            else:
+                move_mean = np.mean([move_mean,aux_counter])
+            aux_counter = 0
+            #print(f"{reset_counter}: Generating new board...")
             board = initialize_board()
         possible_conflicts = generate_dict_conflicts(board)
         next_move = next(
@@ -79,10 +98,11 @@ def hill_climb_with_random(board: Board):
         v = possible_conflicts[next_move]
         if (1 != 0):
             board = apply_move(board, next_move)
-            print(board)
-            print(current_conflicts)
+            aux_counter+=1
+            #print(board)
+            #print(current_conflicts)
             current_conflicts = v
-    return board
+    return board, reset_counter, move_mean
 
 def next_move_with_lateral(board: Board, limit_break) -> Move:
     possible_conflicts = generate_dict_conflicts(board) # Dicionário ordenado dos movimentos e seus conflitos
@@ -154,21 +174,38 @@ def best_conflict(conflicts: dict) -> int:
 #board = initialize_board()
 #result = hill_climb_with_random(board)
 #print("Result Board", result)
+def main():
+    list_solutions_lateral = []
+    reset_counter_lateral = 0
+    move_mean_lateral = 0
+    while len(list_solutions_lateral) < 92:
+        board = initialize_board()
+        solution, aux_counter, aux_mean = hill_climb_with_lateral(board, 10)
+        if not solution in list_solutions_lateral:
+            list_solutions_lateral.append(solution)
+            if(reset_counter_lateral==0):
+                reset_counter_lateral = aux_counter
+                move_mean_lateral = aux_mean
+            else:
+                reset_counter_lateral = np.mean([reset_counter_lateral, aux_counter])
+                move_mean_lateral = np.mean([move_mean_lateral, aux_mean])
+            #print(solution)
+    print(f"Reset Mean: {reset_counter_lateral};\nMove Mean: {move_mean_lateral};\nSolucoes usando Variacao Lateral: {list_solutions_lateral}")
+    list_solutions_random = []
+    reset_counter_random = 0
+    move_mean_random = 0
+    while len(list_solutions_random) < 92:
+        board = initialize_board()
+        solution, aux_counter, aux_mean = hill_climb_with_random(board)
+        if not solution in list_solutions_random:
+            if(reset_counter_random==0):
+                reset_counter_random = aux_counter
+                move_mean_random = aux_mean
+            else:
+                reset_counter_random = np.mean([reset_counter_random, aux_counter])
+                move_mean_random = np.mean([move_mean_random, aux_mean])
+            list_solutions_random.append(solution)
+    print(f"Reset Mean: {reset_counter_random};\nMove Mean: {move_mean_random};\nSolucoes usando Variacao Random: {list_solutions_random}")
+if __name__=='__main__':
+    main()
 
-
-list_solutions_lateral = []
-while len(list_solutions_lateral) < 92:
-    board = initialize_board()
-    solution = hill_climb_with_lateral(board, 10)
-    if not solution in list_solutions_lateral:
-        list_solutions_lateral.append(solution)
-        #print(solution)
-print("Solucoes usando Variacao Lateral:", list_solutions_lateral)
-
-list_solutions_random = []
-while len(list_solutions_random) < 92:
-    board = initialize_board()
-    solution = hill_climb_with_lateral(board, 10)
-    if not solution in list_solutions_random:
-        list_solutions_random.append(solution)
-print("Solucoes usando Reinicio Aleatorio:", list_solutions_random)
