@@ -1,5 +1,4 @@
 import numpy as np
-import pdb
 from typing import List, Iterable, Tuple
 #Representar o tabuleiro de xadrez para o problema das 8 rainhas
 
