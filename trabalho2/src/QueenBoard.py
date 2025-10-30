@@ -5,8 +5,8 @@ from typing import List, Iterable, Tuple
 Board = List[int]  #Cada índice representa uma coluna, o valor representa a linha da rainha naquela coluna
 Move = Tuple[int, int]  #Representa um movimento como (coluna, linha)
 N = 8  #Número de rainhas e tamanho do tabuleiro
-seed = 42
-np.random.seed(seed)
+#seed = 42
+np.random.seed()#seed)
 
 def initialize_board() -> Board:
     """Initialize random board configuration"""
@@ -45,30 +45,80 @@ def generate_dict_conflicts(board: Board) -> dict:
     sorted_conflicts = dict(sorted(dict_conflicts.items(), key=lambda item: item[1]))
     return sorted_conflicts
 
-def next_move_with_lateral(board: Board, limit_break) -> Move:
-    print("Oi")
+def hill_climb_with_lateral(board: Board, limit_break: int) -> Board:
     current_conflicts = conflicts(board)
-    possible_conflicts = generate_dict_conflicts(board)
-    moves = list(possible_conflicts.items())
-    tested = 0
-    while moves and tested < limit_break:
-        move, conf = moves.pop(0) 
-        tested+=1
-        possible_board = apply_move(board, move)
-        next_conflicts = generate_dict_conflicts(possible_board)
 
-        #print(f"Testing move {move}: best(next)={best_conflict(next_conflicts)}, best(current)={best_conflict(possible_conflicts)}")
+    while current_conflicts != 0:
+        next_move = next_move_with_lateral(board, limit_break)
 
-        if best_conflict(next_conflicts) < best_conflict(possible_conflicts):
-            #print(f"Chosen move: {move}")
-            return move
+        if next_move == (8, 8):
+            # only reset if board is not solved
+            if current_conflicts != 0:
+                print ("Generating new board...")
+                board = initialize_board()
         else:
-            continue
-            #print(f"Move {move} not improving, trying next...")
-    # if no improving move found
-    #print("No better move found — returning sentinel (8, 8)")
-    return (8, 8)
+            board = apply_move(board, next_move)
 
+        # update conflicts AFTER applying move or reset
+        current_conflicts = conflicts(board)
+        #print(f"Current conflicts: {current_conflicts}")
+
+    return board
+
+def next_move_with_lateral(board: Board, limit_break) -> Move:
+    possible_conflicts = generate_dict_conflicts(board) # Dicionário ordenado dos movimentos e seus conflitos
+    current_conflicts = conflicts(board)
+    best_conflict_current_neighbor = best_conflict(possible_conflicts)
+
+    # 1. Encontrar o conjunto de movimentos que minimizam conflitos (ascendentes ou laterais)
+    best_moves = []
+    min_conf_next_step = float('inf')
+
+    # Percorrer os movimentos ordenados
+    for move, conf in possible_conflicts.items():
+        if conf < min_conf_next_step:
+            min_conf_next_step = conf
+            best_moves = [(move, conf)]
+        elif conf == min_conf_next_step:
+            best_moves.append((move, conf))
+        elif conf > min_conf_next_step:
+            # Como o dicionário já está ordenado, podemos parar
+            break
+
+    # 2. Se houver movimentos ascendentes (melhores que o estado atual)
+    if min_conf_next_step < current_conflicts:
+        # Pega o primeiro movimento ascendente encontrado (o mais simples)
+        move, conf = best_moves[0]
+        #print(f"Chosen move: {move} (Ascendente: {current_conflicts} -> {conf})")
+        return move
+
+    # 3. Se houver movimentos laterais (plateau)
+    if min_conf_next_step == current_conflicts and current_conflicts > 0:
+        tested = 0
+        
+        # Filtra apenas os movimentos que são laterais (já fizemos isso implicitamente em best_moves)
+        lateral_moves = [item for item in best_moves if item[1] == current_conflicts]
+        
+        for move, conf in lateral_moves:
+            if tested >= limit_break:
+                break
+                
+            tested += 1
+            possible_board = apply_move(board, move)
+            next_conflicts = generate_dict_conflicts(possible_board)
+            best_conflict_from_move = best_conflict(next_conflicts)
+            
+            #print(f"Testing lateral move {move}: best(next)={best_conflict_from_move}, best(current)={best_conflict_current_neighbor}")
+
+            # Se a melhor vizinhança do novo estado (lateral) for estritamente melhor 
+            # que a melhor vizinhança do estado atual.
+            if best_conflict_from_move < best_conflict_current_neighbor:
+                #print(f"Chosen move: {move} (Lateral: {current_conflicts} -> {conf} com melhor vizinhança)")
+                return move
+            
+    # 4. Se não houver movimentos ascendentes e nenhum lateral que melhore a melhor vizinhança (pico ou plateau sem saída)
+    #print("No better/promising lateral move found — returning sentinel (8, 8)")
+    return (8, 8)
 
 def best_conflict(conflicts: dict) -> int:
     """Return the conflict value of the best move from the provided dict.
@@ -79,20 +129,14 @@ def best_conflict(conflicts: dict) -> int:
     _, conf = next(iter(conflicts.items()))
     return conf
 
-board = [7, 4, 0, 3, 1, 6, 2, 2] # exemplo com loop
-#board = [0, 4, 7, 5, 2, 6, 1, 3] # exemplo solucionado
-next_move_with_lateral(board, 10)
 
-"""
-board = [0, 2, 7, 3, 2, 6, 2, 3]  # exemplo qualquer
-dict_conflicts = generate_dict_conflicts(board)
-list_conflicts = []
-for move, conf in dict_conflicts.items():
-    list_conflicts.append(move)
-    #print(f'Move: {move}, Conflicts: {conf}')
-
-limit_iterations = 10
-for i in range(limit_iterations):
-    new_move = list_conflicts.pop(0)
-    print(new_move)
-"""
+#board = [0, 4, 7, 3, 2, 6, 2, 3] # exemplo qualquer
+#board = [7, 4, 0, 3, 1, 6, 2, 2] # exemplo com loop
+list_solutions = []
+while len(list_solutions) < 92:
+    board = initialize_board()
+    solution = hill_climb_with_lateral(board, 10)
+    if not solution in list_solutions:
+        list_solutions.append(solution)
+        #print(solution)
+print(list_solutions)
