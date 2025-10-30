@@ -1,4 +1,5 @@
 import numpy as np
+import pdb
 from typing import List, Iterable, Tuple
 #Representar o tabuleiro de xadrez para o problema das 8 rainhas
 
@@ -63,6 +64,25 @@ def hill_climb_with_lateral(board: Board, limit_break: int) -> Board:
         current_conflicts = conflicts(board)
         #print(f"Current conflicts: {current_conflicts}")
 
+    return board
+
+def hill_climb_with_random(board: Board):
+    current_conflicts = conflicts(board)
+    while current_conflicts !=0:
+        restart_test = np.random.randint(0, 20)
+        if restart_test == 1:
+            print ("Generating new board...")
+            board = initialize_board()
+        possible_conflicts = generate_dict_conflicts(board)
+        next_move = next(
+            iter(possible_conflicts)
+        )
+        v = possible_conflicts[next_move]
+        if (1 != 0):
+            board = apply_move(board, next_move)
+            print(board)
+            print(current_conflicts)
+            current_conflicts = v
     return board
 
 def next_move_with_lateral(board: Board, limit_break) -> Move:
@@ -132,11 +152,24 @@ def best_conflict(conflicts: dict) -> int:
 
 #board = [0, 4, 7, 3, 2, 6, 2, 3] # exemplo qualquer
 #board = [7, 4, 0, 3, 1, 6, 2, 2] # exemplo com loop
-list_solutions = []
-while len(list_solutions) < 92:
+#board = initialize_board()
+#result = hill_climb_with_random(board)
+#print("Result Board", result)
+
+
+list_solutions_lateral = []
+while len(list_solutions_lateral) < 92:
     board = initialize_board()
     solution = hill_climb_with_lateral(board, 10)
-    if not solution in list_solutions:
-        list_solutions.append(solution)
+    if not solution in list_solutions_lateral:
+        list_solutions_lateral.append(solution)
         #print(solution)
-print(list_solutions)
+print("Solucoes usando Variacao Lateral:", list_solutions_lateral)
+
+list_solutions_random = []
+while len(list_solutions_random) < 92:
+    board = initialize_board()
+    solution = hill_climb_with_lateral(board, 10)
+    if not solution in list_solutions_random:
+        list_solutions_random.append(solution)
+print("Solucoes usando Reinicio Aleatorio:", list_solutions_random)
