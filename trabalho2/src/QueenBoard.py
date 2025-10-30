@@ -188,13 +188,13 @@ def main():
     solution, aux_counter, aux_mean = hill_climb_with_lateral(board, limit_break)
     t_lateral = time.time()- t_lateral
 
-    print(f'Time: {t_lateral:.10f}s, Reset counter: {aux_counter}, Move mean: {aux_mean:.2f}\nSolution: {solution}\n')
+    print(f'One solution lateral moves:\nTime: {t_lateral:.10f}s, Reset counter: {aux_counter}, Move mean: {aux_mean:.2f}\nSolution: {solution}\n')
 
     t_random = time.time()
     solution, aux_counter, aux_mean = hill_climb_with_random(board)
     t_random = time.time()- t_random
 
-    print(f'Time: {t_random:.10f}s, Reset counter: {aux_counter}, Move mean: {aux_mean:.2f}\nSolution: {solution}\n')
+    print(f'One solution random restart:\nTime: {t_random:.10f}s, Reset counter: {aux_counter}, Move mean: {aux_mean:.2f}\nSolution: {solution}\n')
     
     list_solutions_lateral = []
     reset_counter_lateral = 0
@@ -213,7 +213,7 @@ def main():
                 move_mean_lateral = np.mean([move_mean_lateral, aux_mean])
             #print(solution)
     t_lateral_all = time.time() - t_lateral_all
-    print(f'Time: {t_lateral_all:.10f}s, Reset counter: {reset_counter_lateral}, Move mean: {move_mean_lateral:.2f}\n')
+    print(f'All solutions lateral moves:\nTime: {t_lateral_all:.10f}s, Reset counter: {reset_counter_lateral}, Success rate: {(92.0/(reset_counter_lateral+1))*100:.2f}%, Move mean: {move_mean_lateral:.2f}\n')
     
     list_solutions_random = []
     reset_counter_random = 0
@@ -231,7 +231,7 @@ def main():
                 move_mean_random = np.mean([move_mean_random, aux_mean])
             list_solutions_random.append(solution)
     t_random_all = time.time() - t_random_all
-    print(f'Time: {t_random_all:.10f}s, Reset counter: {reset_counter_random}, Move mean: {move_mean_random:.2f}\n')
+    print(f'All solutions random restart:\nTime: {t_random_all:.10f}s, Reset counter: {reset_counter_random}, Success rate: {(92.0/(reset_counter_random+1))*100:.2f}%, Move mean: {move_mean_random:.2f}\n')
 
 if __name__=='__main__':
     main()
