@@ -1,14 +1,11 @@
 import numpy as np
 from typing import List, Iterable, Tuple
 import time
-#TODO: Corrigir calculo da media de reinícios e movimentos
-#TODO: Implementar métrica de tempo
-
-Board = List[int]  #Cada índice representa uma coluna, o valor representa a linha da rainha naquela coluna
-Move = Tuple[int, int]  #Representa um movimento como (coluna, linha)
-N = 8  #Número de rainhas e tamanho do tabuleiro
-#seed = 42
-np.random.seed()#seed)
+Board = List[int]  #Each index represents a column, and the value at that index represents the row of the queen
+Move = Tuple[int, int]  #Represents a move as (column, row)
+N = 8  #Number of queens and size of the board
+seed = 42 #For reproducibility
+np.random.seed(seed)
 
 def initialize_board() -> Board:
     """Initialize random board configuration"""
@@ -63,7 +60,7 @@ def hill_climb_with_lateral(board: Board, limit_break: int) -> Tuple[Board, int,
                 if aux_counter>0:
                     total_moves += aux_counter
                 aux_counter = 0
-                #print (f"{reset_counter}: Generating new board...")
+                
                 board = initialize_board()
         else:
             board = apply_move(board, next_move)
@@ -71,7 +68,6 @@ def hill_climb_with_lateral(board: Board, limit_break: int) -> Tuple[Board, int,
 		
         # update conflicts AFTER applying move or reset
         current_conflicts = conflicts(board)
-        #print(f"Current conflicts: {current_conflicts}")
 		
     if reset_counter > 0:
         move_mean = total_moves / reset_counter
@@ -91,7 +87,7 @@ def hill_climb_with_random(board: Board) -> Tuple[Board, int, float]:
             if aux_counter>0:
                 total_moves += aux_counter
             aux_counter = 0
-            #print(f"{reset_counter}: Generating new board...")
+            
             board = initialize_board()
         possible_conflicts = generate_dict_conflicts(board)
         next_move = next(
@@ -111,15 +107,15 @@ def hill_climb_with_random(board: Board) -> Tuple[Board, int, float]:
     return board, reset_counter, move_mean
 
 def next_move_with_lateral(board: Board, limit_break) -> Move:
-    possible_conflicts = generate_dict_conflicts(board) # Dicionário ordenado dos movimentos e seus conflitos
+    possible_conflicts = generate_dict_conflicts(board) # Dictionary of moves and their conflicts
     current_conflicts = conflicts(board)
     best_conflict_current_neighbor = best_conflict(possible_conflicts)
 
-    # 1. Encontrar o conjunto de movimentos que minimizam conflitos (ascendentes ou laterais)
+    # 1. Find the best moves (lowest conflicts)
     best_moves = []
     min_conf_next_step = float('inf')
 
-    # Percorrer os movimentos ordenados
+    # Iterate through the sorted possible conflicts
     for move, conf in possible_conflicts.items():
         if conf < min_conf_next_step:
             min_conf_next_step = conf
@@ -127,21 +123,21 @@ def next_move_with_lateral(board: Board, limit_break) -> Move:
         elif conf == min_conf_next_step:
             best_moves.append((move, conf))
         elif conf > min_conf_next_step:
-            # Como o dicionário já está ordenado, podemos parar
+            # Since the dict is sorted, we can break early
             break
 
-    # 2. Se houver movimentos ascendentes (melhores que o estado atual)
+    # 2. If there are ascending moves (better than current)
     if min_conf_next_step < current_conflicts:
-        # Pega o primeiro movimento ascendente encontrado (o mais simples)
+        # Pick one of the best moves (there could be multiple)
         move, conf = best_moves[0]
-        #print(f"Chosen move: {move} (Ascendente: {current_conflicts} -> {conf})")
+        
         return move
 
-    # 3. Se houver movimentos laterais (plateau)
+    # 3. If there are lateral moves (plateau)
     if min_conf_next_step == current_conflicts and current_conflicts > 0:
         tested = 0
         
-        # Filtra apenas os movimentos que são laterais (já fizemos isso implicitamente em best_moves)
+        # Filter only lateral moves (we already know best_moves are the best possible)
         lateral_moves = [item for item in best_moves if item[1] == current_conflicts]
         
         for move, conf in lateral_moves:
@@ -152,17 +148,12 @@ def next_move_with_lateral(board: Board, limit_break) -> Move:
             possible_board = apply_move(board, move)
             next_conflicts = generate_dict_conflicts(possible_board)
             best_conflict_from_move = best_conflict(next_conflicts)
-            
-            #print(f"Testing lateral move {move}: best(next)={best_conflict_from_move}, best(current)={best_conflict_current_neighbor}")
 
-            # Se a melhor vizinhança do novo estado (lateral) for estritamente melhor 
-            # que a melhor vizinhança do estado atual.
+            # If this lateral move leads to a better neighbor, choose it
             if best_conflict_from_move < best_conflict_current_neighbor:
-                #print(f"Chosen move: {move} (Lateral: {current_conflicts} -> {conf} com melhor vizinhança)")
                 return move
             
-    # 4. Se não houver movimentos ascendentes e nenhum lateral que melhore a melhor vizinhança (pico ou plateau sem saída)
-    #print("No better/promising lateral move found — returning sentinel (8, 8)")
+    # 4. If no better or promising lateral move found, return sentinel
     return (8, 8)
 
 def best_conflict(conflicts: dict) -> int:
@@ -174,16 +165,11 @@ def best_conflict(conflicts: dict) -> int:
     _, conf = next(iter(conflicts.items()))
     return conf
 
-
-#board = [0, 4, 7, 3, 2, 6, 2, 3] # exemplo qualquer
-#board = [7, 4, 0, 3, 1, 6, 2, 2] # exemplo com loop
-#board = initialize_board()
-#result = hill_climb_with_random(board)
-#print("Result Board", result)
-limit_break = 10
+limit_break = 10 #Limit for lateral moves before reset
 def main():
-    board = initialize_board()
+    board = initialize_board() #Random initial board
 
+    #Solve one instance with each method
     t_lateral = time.time()
     solution, aux_counter, aux_mean = hill_climb_with_lateral(board, limit_break)
     t_lateral = time.time()- t_lateral
@@ -196,6 +182,7 @@ def main():
 
     print(f'One solution random restart:\nTime: {t_random:.10f}s, Reset counter: {aux_counter}, Move mean: {aux_mean:.2f}\nSolution: {solution}\n')
     
+    #Solve all 92 solutions with each method
     list_solutions_lateral = []
     reset_counter_lateral = 0
     move_mean_lateral = 0
@@ -211,7 +198,6 @@ def main():
             else:
                 reset_counter_lateral += aux_counter
                 move_mean_lateral = np.mean([move_mean_lateral, aux_mean])
-            #print(solution)
     t_lateral_all = time.time() - t_lateral_all
     print(f'All solutions lateral moves:\nTime: {t_lateral_all:.10f}s, Reset counter: {reset_counter_lateral}, Success rate: {(92.0/(reset_counter_lateral+1))*100:.2f}%, Move mean: {move_mean_lateral:.2f}\n')
     
