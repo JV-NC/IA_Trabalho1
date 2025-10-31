@@ -1,11 +1,18 @@
 import numpy as np
-from typing import List, Iterable, Tuple
+from typing import List, Iterable, Tuple, Dict
 import time
+import os
+from GraphGenerator import generate_bar_chart
 Board = List[int]  #Each index represents a column, and the value at that index represents the row of the queen
 Move = Tuple[int, int]  #Represents a move as (column, row)
 N = 8  #Number of queens and size of the board
 seed = 42 #For reproducibility
 np.random.seed(seed)
+
+output_dir = 'trabalho2/output'
+os.makedirs(output_dir,exist_ok=True) #Ensure output directory exists
+
+colors = {'Lateral Moves': 'orange', 'Random Restart': 'green'} #Dict of colors for bar charts
 
 def initialize_board() -> Board:
     """Initialize random board configuration"""
@@ -35,7 +42,7 @@ def apply_move(board: Board, move: Move) -> Board:
     new_board[col] = row
     return new_board
 
-def generate_dict_conflicts(board: Board) -> dict:
+def generate_dict_conflicts(board: Board) -> Dict:
     """Generate a dictionary of moves and their resulting conflict counts"""
     dict_conflicts = {}
     for move in neighbors(board):
@@ -93,13 +100,9 @@ def hill_climb_with_random(board: Board) -> Tuple[Board, int, float]:
         next_move = next(
             iter(possible_conflicts)
         )
-        v = possible_conflicts[next_move]
-        if (1 != 0): #TODO: ???????
-            board = apply_move(board, next_move)
-            aux_counter+=1
-            #print(board)
-            #print(current_conflicts)
-            current_conflicts = v
+        board = apply_move(board, next_move)
+        aux_counter+=1
+        current_conflicts = possible_conflicts[next_move]
     if reset_counter > 0:
         move_mean = total_moves / reset_counter
     else:
@@ -156,7 +159,7 @@ def next_move_with_lateral(board: Board, limit_break) -> Move:
     # 4. If no better or promising lateral move found, return sentinel
     return (8, 8)
 
-def best_conflict(conflicts: dict) -> int:
+def best_conflict(conflicts: Dict) -> int:
     """Return the conflict value of the best move from the provided dict.
     Assumes `conflicts` is ordered with best (lowest) first."""
     if not conflicts:
@@ -174,6 +177,8 @@ def main():
     solution, aux_counter, aux_mean = hill_climb_with_lateral(board, limit_break)
     t_lateral = time.time()- t_lateral
 
+    aux_counter1 = aux_counter
+
     print(f'One solution lateral moves:\nTime: {t_lateral:.10f}s, Reset counter: {aux_counter}, Move mean: {aux_mean:.2f}\nSolution: {solution}\n')
 
     t_random = time.time()
@@ -181,7 +186,13 @@ def main():
     t_random = time.time()- t_random
 
     print(f'One solution random restart:\nTime: {t_random:.10f}s, Reset counter: {aux_counter}, Move mean: {aux_mean:.2f}\nSolution: {solution}\n')
-    
+
+    #Generate bar charts for time percentage and number of resets comparison for one solution
+    generate_bar_chart({'Lateral Moves': t_lateral/t_random*100, 'Random Restart': 100}, 
+                       'Time Percentage Comparison for One Solution', 'Method', 'Time Percentage (%)', f'{output_dir}/one_solution_time_percentage_comparison.png',colors)
+    generate_bar_chart({'Lateral Moves': aux_counter1, 'Random Restart': aux_counter},
+                       'Reset Counter Comparison for One Solution', 'Method', 'Reset Counter', f'{output_dir}/one_solution_reset_counter_comparison.png',colors)
+
     #Solve all 92 solutions with each method
     list_solutions_lateral = []
     reset_counter_lateral = 0
@@ -219,6 +230,12 @@ def main():
     t_random_all = time.time() - t_random_all
     print(f'All solutions random restart:\nTime: {t_random_all:.10f}s, Reset counter: {reset_counter_random}, Success rate: {(92.0/(reset_counter_random+1))*100:.2f}%, Move mean: {move_mean_random:.2f}\n')
 
+    #Generate bar charts for time percentage and success rate comparison for all solutions
+    generate_bar_chart({'Lateral Moves': t_lateral_all/t_random_all*100, 'Random Restart': 100},
+                       'Time Percentage Comparison for All Solutions', 'Method', 'Time Percentage (%)', f'{output_dir}/all_solutions_time_percentage.png',colors)
+    generate_bar_chart({'Lateral Moves': (92.0/(reset_counter_lateral+1))*100, 'Random Restart': (92.0/(reset_counter_random+1))*100},
+                       'Success Rate Comparison for All Solutions', 'Method', 'Success Rate (%)', f'{output_dir}/all_solutions_success_rate_comparison.png',colors)
+    
 if __name__=='__main__':
     main()
 
