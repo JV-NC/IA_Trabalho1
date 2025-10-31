@@ -104,7 +104,7 @@ Foram construídos **2 scripts em Python**:
 #### Dependências
 Para instalar as dependências, abra um terminal e execute o seguinte comando
 ```bash
-pip install numpy
+pip install numpy matplotlib
 ```
 ---
 
